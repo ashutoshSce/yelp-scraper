@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const RestaurantSchema = mongoose.Schema({
   dtRowId: Number,
-  name: Number,
+  name: String,
   phone: String,
   priceRange: String,
   categories: [String],
@@ -11,7 +11,7 @@ const RestaurantSchema = mongoose.Schema({
   link: String,
   linkText: String,
   rating: Number,
-  reviewCount: String,
+  reviewCount: Number,
   businessUrl: String,
   location: {
     latitude: Number,
