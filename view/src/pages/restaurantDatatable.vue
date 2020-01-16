@@ -22,7 +22,7 @@
       <div class="column is-3-desktop is-8-tablet is-12-mobile">
         <vue-select-filter
           class="box"
-          title="Categories"
+          title="Cuisines"
           multiple
           :source="'api/v1/restaurant-filter/categories'"
           v-model="filters.categories"
@@ -94,8 +94,8 @@ export default {
       },
       intervals: {
         rating: {
-          min: 1,
-          max: 5,
+          min: null,
+          max: null,
         },
       },
     };

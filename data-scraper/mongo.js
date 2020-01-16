@@ -11,6 +11,7 @@ module.exports = class Mongo {
   connectToDb() {
     return new Promise((resolve, reject) => {
       MongoClient.connect(url, {
+        useUnifiedTopology: true,
         useNewUrlParser: true
       }, (err, client) => {
         if (err) throw err;

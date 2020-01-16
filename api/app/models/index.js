@@ -8,6 +8,7 @@ const mongoDB = `mongodb://${dbInfo.host}:${dbInfo.port}/${dbInfo.database}`;
 mongoose
   .connect(mongoDB, {
     useCreateIndex: true,
+    useUnifiedTopology: true,
     useNewUrlParser: true
   })
   .catch(() => {

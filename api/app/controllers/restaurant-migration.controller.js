@@ -8,8 +8,8 @@ const exportData = async (req, res) => {
   let restaurantList = [];
   const restaurants = [];
   let err = {};
-  const skip = req.query.skip || 0;
-  const limit = req.query.limit || 5;
+  const skip = parseInt(req.query.skip, 10) || 0;
+  const limit = parseInt(req.query.limit, 10) || 5;
   [err, restaurantList] = await to(
     restaurant
       .find()
@@ -44,6 +44,8 @@ const exportData = async (req, res) => {
         throw e;
       }
     });
+  } else {
+    console.log(err);
   }
   res.status(200).json(restaurants);
 };

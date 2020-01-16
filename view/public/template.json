@@ -141,7 +141,7 @@
 				"escapable": true
 			}
 		}, {
-			"label": "Categories",
+			"label": "Cuisines",
 			"name": "categories",
 			"data": "restaurant.categories",
 			"meta": {

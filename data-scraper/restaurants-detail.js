@@ -66,7 +66,7 @@ let failCount = 0;
       const pageUrl = await page.url();
       logger.sendMessageToSlack(pageUrl + ' Error in Scraping Yelp Website Detail. ' + skip +' '+ limit);
       failCount++;
-      if(failCount > 4) {
+      if(failCount > 8) {
          break;
       }
     }
