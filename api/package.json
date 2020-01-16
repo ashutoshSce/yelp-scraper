@@ -1,0 +1,42 @@
+{
+  "name": "yelp-scraper-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API to serve yelp-scraper tabular data",
+  "main": "server.js",
+  "author": "Ashutosh Kumar Jha",
+  "license": "ISC",
+  "scripts": {
+    "prod": "node ./bin/www",
+    "dev": "nodemon ./bin/www",
+    "lint": "eslint app",
+    "lint-fix": "eslint app --fix",
+    "format": "prettier --write '**/*.{js,jsx}'"
+  },
+  "dependencies": {
+    "await-to-js": "^2.1.1",
+    "body-parser": "^1.18.3",
+    "debug": "^4.1.1",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "human-date": "^1.4.0",
+    "json2csv": "^4.3.3",
+    "lodash": "^4.17.11",
+    "mongoose": "^5.4.9",
+    "morgan": "^1.9.1",
+    "puppeteer": "^1.14.0",
+    "winston": "^3.2.1",
+    "winston-daily-rotate-file": "^3.6.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-prettier": "^4.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-prettier": "^3.0.1",
+    "eslint-plugin-react": "^7.12.4",
+    "nodemon": "^1.18.9",
+    "prettier": "^1.16.4"
+  }
+}

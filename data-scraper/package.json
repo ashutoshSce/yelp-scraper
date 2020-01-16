@@ -1,0 +1,18 @@
+{
+  "name": "yelp-scraper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scrape Data from yelp website",
+  "main": "download-latest-list.js",
+  "scripts": {
+    "start": "node download-latest-list.js NEW 1"
+  },
+  "author": "Ashutosh Kumar Jha",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^6.2.0",
+    "mongodb": "^3.1.12",
+    "puppeteer": "^1.12.2",
+    "request": "^2.88.0"
+  }
+}
