@@ -45,7 +45,7 @@ function onlyUnique(value, index, self) {
     ignoreHTTPSErrors: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
-  while (1) {
+  while (count < 961) {
     logger.sendMessageToSlack('Scraping Yelp.' + count);
     const page = await browser.newPage();
     const pageUrl = 'https://www.yelp.com/search/snippet?cflt=restaurants&find_loc='+loc+'&start='+count;

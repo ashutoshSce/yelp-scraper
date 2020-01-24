@@ -74,5 +74,13 @@ Here Skip = 0, limit = 100
 It will record `link` and `linkText` in above document from 0th document to 100th.
 Next time increase skip and limit value.
 
+To get restaurants for all given locations hardcode it in restaurants-by-location.js in `location` object.
+```bash
+node restaurants-by-location.js 0
+```
+Here SkipLocation = 0, in case if you want to skip your hardcoded locations in an Object.
+It will record all restaurants details except link and linkText in mondo db restaurants collection
+This file you can run in a week to know, if any new restaurants got added for given locations.
+
 
 kindly refer original website [Yelp](https://www.yelp.com/). Type area name in Near Text box.
