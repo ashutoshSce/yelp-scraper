@@ -31,6 +31,15 @@ module.exports = class Mongo {
     });
   }
 
+  queryFullObject(collectionName, query) {
+    return new Promise((resolve, reject) => {
+      this.db.collection(collectionName).find(query).toArray(function (err, result) {
+        if (err) throw err;
+        resolve(result);
+      });
+    });
+  }
+
   queryObjectOffset(collectionName, skip, limit) {
     return new Promise((resolve, reject) => {
       this.db.collection(collectionName).find().skip(skip).limit(limit).toArray(function (err, result) {
@@ -66,6 +75,33 @@ module.exports = class Mongo {
     return new Promise((resolve, reject) => {
       this.client.close();
       resolve();
+    });
+  }
+
+  duplicateBusinessUrl(collectionName) {
+    return new Promise((resolve, reject) => {
+      this.db.collection(collectionName).aggregate( 
+      [ 
+          { 
+              $group : { _id : "$businessUrl", count: { $sum: 1 } } 
+          },
+          {
+             $match: { "count": { $gt: 1 } }
+          },
+          { $project : { businessUrl : 1 } }
+      ] ).toArray(function (err, result) {
+        if (err) throw err;
+        resolve(result);
+      });
+    });
+  }
+
+  deleteManyObject(collectionName, query) {
+    return new Promise((resolve, reject) => {
+      this.db.collection(collectionName).deleteMany(query, function (err, result) {
+        if (err) throw err;
+        resolve(result);
+      });
     });
   }
 

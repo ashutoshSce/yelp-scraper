@@ -1,4 +1,4 @@
-/* Command: node restaurants-detail.js 5634 100 */
+/* Command: node restaurants-detail.js 6629 1000 */
 require('dotenv').config({
   path: __dirname + '/.env'
 });
@@ -19,9 +19,9 @@ let failCount = 0;
   process.on('unhandledRejection', (err) => {
     console.log(require('util').format(err));
     logger.sendMessageToSlack(skip+', '+limit+' Caught exceptionn: ' + err.toString()).then(() => {
-      spawn(process.env.NODE_PATH, [__dirname + '/restaurants-detail.js', skip, limit], {
-        detached: true
-      });
+      // spawn(process.env.NODE_PATH, [__dirname + '/restaurants-detail.js', skip, limit], {
+      //   detached: true
+      // });
       process.exit();
     });
   });
@@ -46,28 +46,28 @@ let failCount = 0;
     restaurantDetails = await page.evaluate(() =>  {
       return document.querySelector("body").outerHTML; 
     });
-
-    const reference = restaurantDetails.split("Business website</p>");
-    let tmp1 = [];
-    if(reference.length > 1) {
-      tmp1 = reference[1].split('</a></div>');
-      const linkText = tmp1[0]+'</a>';
-      const text = linkText.match(/<a [^>]+>([^<]+)<\/a>/)[1];
-      const link = linkText.match(/<a [^>]* href="([^"]*)"/)[1];
-      const url = link.match(/url=(.*)&amp;web/)[1];
-      const item = restaurants[websiteIndex];
-      item.link = decodeURIComponent(url);
-      item.linkText = text;
-      await mongo.updateObject('restaurant', item, { businessUrl: websiteUrl });
-      failCount = 0;
-    } else {
-      await page.setViewport({ width: 1920, height: 1080 });
-      await page.screenshot({ path: './screenshots/'+skip+'.png' });
-      const pageUrl = await page.url();
-      logger.sendMessageToSlack(pageUrl + ' Error in Scraping Yelp Website Detail. ' + skip +' '+ limit);
+    if(restaurantDetails.indexOf('Sorry, you’re not allowed to access this page.') >= 0) {
+      logger.sendMessageToSlack(pageUrl + ' BLOCKED -- Blocked ' + skip +' '+ limit);
       failCount++;
-      if(failCount > 8) {
-         break;
+      await page.close();
+      break;
+    } else {
+      const reference = restaurantDetails.split("Business website</p>");
+      let tmp1 = [];
+      if(reference.length > 1) {
+        tmp1 = reference[1].split('</a></div>');
+        const linkText = tmp1[0]+'</a>';
+        const text = linkText.match(/<a [^>]+>([^<]+)<\/a>/)[1];
+        const link = linkText.match(/<a [^>]* href="([^"]*)"/)[1];
+        const url = link.match(/url=(.*)&amp;web/)[1];
+        const item = restaurants[websiteIndex];
+        item.link = decodeURIComponent(url);
+        item.linkText = text;
+        await mongo.updateObject('restaurant', item, { businessUrl: websiteUrl });
+        failCount = 0;
+      } else {
+        logger.sendMessageToSlack(pageUrl + ' Error in Scraping Yelp Website Detail. ' + skip +' '+ limit);
+        failCount++;
       }
     }
     await page.close();

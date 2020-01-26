@@ -1,4 +1,4 @@
-/* node restaurants-by-location.js 0 */
+/* node restaurants-by-location.js 0 0*/
 
 require('dotenv').config({
   path: __dirname + '/.env'
@@ -17,14 +17,15 @@ const locations = {
   "Queens%2C%20NY": "Queens",
   "Manhattan%2C%20NY": "Manhattan",
   "Staten%20Island%2C%20NY": "Staten Island",
-  "Nassau%20County%2C%20NY": "Nassau Country",
-  "Suffolk%20County%2C%20NY": "Suffolk Country",
-  "Rockland%20County%2C%20NY": "Rockland Country",
+  "Nassau%20County%2C%20NY": "Nassau County",
+  "Suffolk%20County%2C%20NY": "Suffolk County",
+  "Rockland%20County%2C%20NY": "Rockland County",
   "Rhinebeck%2C%20NY": "Rhinebeck",
   "Woodstock%2C%20NY": "Woodstock",
   "Tuxedo%2C%20NY": "Tuxedo",
 };
 let skipLocation = process.argv[2];
+let pageCount = parseInt(process.argv[3]) || 0;
 
 function onlyUnique(value, index, self) { 
   return self.indexOf(value) === index;
@@ -58,6 +59,10 @@ function onlyUnique(value, index, self) {
     }
     let locality =locations[loc];
     let count = 0;
+    if(pageCount > 0) {
+      count = pageCount;
+      pageCount = 0;
+    }
     while (count < 961) {
       logger.sendMessageToSlack('Scraping restaurants in '+locality+' '+ count);
       const pageUrl = 'https://www.yelp.com/search/snippet?cflt=restaurants&find_loc='+loc+'&start='+count;

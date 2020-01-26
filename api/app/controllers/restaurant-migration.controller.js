@@ -47,7 +47,11 @@ const exportData = async (req, res) => {
   } else {
     console.log(err);
   }
-  res.status(200).json(restaurants);
+  res.status(200).json({
+    count: restaurants.length,
+    first: restaurants[0],
+    last: restaurants[restaurants.length - 1]
+  });
 };
 
 const importData = async (req, res) => {
@@ -58,8 +62,12 @@ const importData = async (req, res) => {
   const path = `./migrations/${skip}-${limit}.json`;
   const data = fs.readFileSync(path);
   restaurantList = JSON.parse(data.toString());
-  await to(restaurant.collection.insert(restaurantList));
-  res.status(200).json(restaurantList);
+  await to(restaurant.collection.insertOne(restaurantList));
+  res.status(200).json({
+    count: restaurantList.length,
+    first: restaurantList[0],
+    last: restaurantList[restaurantList.length - 1]
+  });
 };
 
 module.exports.exportData = exportData;
