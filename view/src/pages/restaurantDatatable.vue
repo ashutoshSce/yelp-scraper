@@ -46,6 +46,15 @@
           @update="intervals.rating.min = $event.min; intervals.rating.max = $event.max;"
         />
       </div>
+      <div class="column is-3-desktop is-8-tablet is-12-mobile">
+        <vue-select-filter
+          class="box"
+          title="Sponsored"
+          multiple
+          :options="sponsorshipList"
+          v-model="filters.isAd"
+        />
+      </div>
     </div>
     <vue-table
       class="box is-paddingless raises-on-hover is-rounded"
@@ -86,11 +95,13 @@ export default {
     return {
       path: '/template.json',
       priceRangeList: [],
+      sponsoredList: [],
       filters: {
         priceRange: [],
         categories: [],
         localities: [],
         neighborhoods: [],
+        isAd: [],
       },
       intervals: {
         rating: {
@@ -107,6 +118,10 @@ export default {
       { name: 'Moderate', id: '$$' },
       { name: 'Pricey', id: '$$$' },
       { name: 'Ultra High-End', id: '$$$$' },
+    ];
+    this.sponsorshipList = [
+      { name: 'Sponsored Results', id: 'true' },
+      { name: 'Not Sponsored', id: 'false' },
     ];
   },
 };

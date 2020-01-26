@@ -260,6 +260,30 @@
 				"sort": null,
 				"escapable": true
 			}
+		}, {
+			"label": "Sponsored",
+			"name": "isAd",
+			"data": "restaurant.isAd",
+			"meta": {
+				"searchable": true,
+				"sortable": true,
+				"translatable": false,
+				"boolean": true,
+				"slot": false,
+				"rogue": false,
+				"total": false,
+				"date": false,
+				"array": true,
+				"icon": false,
+				"clickable": false,
+				"customTotal": false,
+				"notExportable": false,
+				"nullLast": false,
+				"visible": true,
+				"hidden": false,
+				"sort": null,
+				"escapable": true
+			}
 		}],
 		"readPath": "\/api\/v1\/restaurant",
 		"lengthMenu": [10, 25, 50, 100],

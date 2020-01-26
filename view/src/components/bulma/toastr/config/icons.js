@@ -6,12 +6,12 @@ import {
   faInfoCircle,
   faCheckCircle,
   faExclamationCircle,
-  faTimesCircle,
+  faTimes,
 }
   from '@fortawesome/free-solid-svg-icons';
 
 library.add([
-  faComment, faInfoCircle, faCheckCircle, faExclamationCircle, faTimesCircle,
+  faComment, faInfoCircle, faCheckCircle, faExclamationCircle, faTimes,
 ]);
 
 export default {
@@ -20,5 +20,5 @@ export default {
   info: faInfoCircle,
   success: faCheckCircle,
   warning: faExclamationCircle,
-  danger: faTimesCircle,
+  danger: faTimes,
 };

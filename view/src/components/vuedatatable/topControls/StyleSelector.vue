@@ -52,7 +52,7 @@ export default {
     },
     toggle(style) {
       this.template.style = this.has(style)
-        ? this.styles.filter(value => value !== style).join(' ')
+        ? this.styles.filter((value) => value !== style).join(' ')
         : `${this.template.style} ${style}`;
     },
   },
