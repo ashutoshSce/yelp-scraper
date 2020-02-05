@@ -62,7 +62,7 @@ const importData = async (req, res) => {
   const path = `./migrations/${skip}-${limit}.json`;
   const data = fs.readFileSync(path);
   restaurantList = JSON.parse(data.toString());
-  await to(restaurant.collection.insertOne(restaurantList));
+  await to(restaurant.collection.insertMany(restaurantList));
   res.status(200).json({
     count: restaurantList.length,
     first: restaurantList[0],
