@@ -10,6 +10,7 @@ const exportData = async (req, res) => {
   let err = {};
   const skip = parseInt(req.query.skip, 10) || 0;
   const limit = parseInt(req.query.limit, 10) || 5;
+  const format = req.query.format || 'file';
   [err, restaurantList] = await to(
     restaurant
       .find()
@@ -38,20 +39,26 @@ const exportData = async (req, res) => {
       }
       restaurants.push(item);
     });
-    const path = `./migrations/${skip}-${limit}.json`;
-    fs.writeFile(path, JSON.stringify(restaurants), e => {
-      if (e) {
-        throw e;
-      }
-    });
+    if (format === 'file') {
+      const path = `./migrations/${skip}-${limit}.json`;
+      fs.writeFile(path, JSON.stringify(restaurants), e => {
+        if (e) {
+          throw e;
+        }
+      });
+    }
   } else {
     console.log(err);
   }
-  res.status(200).json({
-    count: restaurants.length,
-    first: restaurants[0],
-    last: restaurants[restaurants.length - 1]
-  });
+  if (format === 'file') {
+    res.status(200).json({
+      count: restaurants.length,
+      first: restaurants[0],
+      last: restaurants[restaurants.length - 1]
+    });
+  } else if (format === 'json') {
+    res.status(200).json(restaurants);
+  }
 };
 
 const importData = async (req, res) => {

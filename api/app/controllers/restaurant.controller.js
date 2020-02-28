@@ -120,12 +120,12 @@ const get = async (req, res) => {
     }
   });
 
+  select.location = 1;
   if (req.query.exportExcel === undefined) {
     [, count] = await to(restaurant.countDocuments());
     [, filtered] = await to(restaurant.countDocuments(where));
     select.businessUrl = 1;
     select.linkText = 1;
-    select.location = 1;
   } else {
     skip = 0;
     limit = 0;
@@ -161,28 +161,35 @@ const get = async (req, res) => {
     if (req.query.exportExcel === undefined) {
       restaurantList[index].dtRowId = index + 1;
 
-      restaurantList[index].name = `<a href="https://www.yelp.com${
-        restaurantList[index].businessUrl
-      }" target="_blank">${restaurantList[index].name}</a>`;
+      restaurantList[
+        index
+      ].name = `<a href="https://www.yelp.com${restaurantList[index].businessUrl}" target="_blank">${restaurantList[index].name}</a>`;
 
       if (restaurantList[index].linkText === undefined) {
         restaurantList[index].link = '';
       } else {
-        restaurantList[index].link = `<a href="${restaurantList[index].link}" target="_blank">${
-          restaurantList[index].linkText
-        }</a>`;
+        restaurantList[
+          index
+        ].link = `<a href="${restaurantList[index].link}" target="_blank">${restaurantList[index].linkText}</a>`;
       }
 
       if (
         restaurantList[index].location !== undefined &&
         restaurantList[index].location.latitude !== undefined
       ) {
-        restaurantList[index].address = `<a href="https://www.latlong.net/c/?lat=${
-          restaurantList[index].location.latitude
-        }&long=${restaurantList[index].location.longitude}" target="_blank">${
-          restaurantList[index].address
-        }</a>`;
+        restaurantList[
+          index
+        ].address = `<a href="https://www.latlong.net/c/?lat=${restaurantList[index].location.latitude}&long=${restaurantList[index].location.longitude}" target="_blank">${restaurantList[index].address}</a>`;
       }
+    } else if (
+      restaurantList[index].location !== undefined &&
+      restaurantList[index].location.latitude !== undefined
+    ) {
+      restaurantList[
+        index
+      ].lat_lng = `${restaurantList[index].location.latitude} ${restaurantList[index].location.longitude}`;
+    } else {
+      restaurantList[index].lat_lng = '';
     }
   }
 
