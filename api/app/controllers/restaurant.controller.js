@@ -19,7 +19,7 @@ const get = async (req, res) => {
   let skip = 0;
   let limit = 0;
   const select = {
-    _id: 0
+    _id: 0,
   };
 
   let count;
@@ -52,7 +52,7 @@ const get = async (req, res) => {
   }
 
   // calculations of sorting, filter and intervals condition
-  req.query.columns.forEach(column => {
+  req.query.columns.forEach((column) => {
     const detail = JSON.parse(column);
     if (keysList.includes(detail.name)) {
       if (detail.meta.visible) {
@@ -70,7 +70,7 @@ const get = async (req, res) => {
         filterMap[detail.name].length
       ) {
         where[detail.name] = {
-          $in: filterMap[detail.name]
+          $in: filterMap[detail.name],
         };
       }
 
@@ -78,18 +78,13 @@ const get = async (req, res) => {
       if (intervalMap[detail.name] !== undefined) {
         where[detail.name] = {
           $gte: '',
-          $lte: ''
+          $lte: '',
         };
 
         if (intervalMap[detail.name].min !== undefined && intervalMap[detail.name].min !== null) {
           let value = intervalMap[detail.name].min;
           if (detail.meta.date) {
-            value = new Date(
-              intervalMap[detail.name].min
-                .split('-')
-                .reverse()
-                .join('-')
-            );
+            value = new Date(intervalMap[detail.name].min.split('-').reverse().join('-'));
           }
           where[detail.name].$gte = value;
           isInterval = true;
@@ -100,12 +95,7 @@ const get = async (req, res) => {
         if (intervalMap[detail.name].max !== undefined && intervalMap[detail.name].max !== null) {
           let value = intervalMap[detail.name].max;
           if (detail.meta.date) {
-            value = new Date(
-              intervalMap[detail.name].max
-                .split('-')
-                .reverse()
-                .join('-')
-            );
+            value = new Date(intervalMap[detail.name].max.split('-').reverse().join('-'));
           }
           where[detail.name].$lte = value;
           isInterval = true;
@@ -132,13 +122,7 @@ const get = async (req, res) => {
   }
 
   const [, restaurantList] = await to(
-    restaurant
-      .find(where)
-      .select(select)
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean()
+    restaurant.find(where).select(select).sort(sort).skip(skip).limit(limit).lean()
   );
 
   for (let index = 0; index < restaurantList.length; index += 1) {
@@ -148,6 +132,29 @@ const get = async (req, res) => {
 
     if (restaurantList[index].categories !== undefined) {
       restaurantList[index].categories = restaurantList[index].categories.join(', ');
+    }
+
+    if (restaurantList[index].services !== undefined) {
+      restaurantList[index].services = restaurantList[index].services.join(', ');
+    }
+
+    if (req.query.exportExcel !== undefined) {
+      if (restaurantList[index].facebook !== undefined) {
+        restaurantList[index].facebook = restaurantList[index].facebook.join(', ');
+      }
+      if (restaurantList[index].instagram !== undefined) {
+        restaurantList[index].instagram = restaurantList[index].instagram.join(', ');
+      }
+      if (restaurantList[index].youtube !== undefined) {
+        restaurantList[index].youtube = restaurantList[index].youtube.join(', ');
+      }
+      if (restaurantList[index].twitter !== undefined) {
+        restaurantList[index].twitter = restaurantList[index].twitter.join(', ');
+      }
+    }
+
+    if (restaurantList[index].emails !== undefined) {
+      restaurantList[index].emails = restaurantList[index].emails.join(', ');
     }
 
     if (restaurantList[index].neighborhoods !== undefined) {
@@ -173,6 +180,51 @@ const get = async (req, res) => {
         ].link = `<a href="${restaurantList[index].link}" target="_blank">${restaurantList[index].linkText}</a>`;
       }
 
+      if (restaurantList[index].facebook === undefined) {
+        restaurantList[index].facebook = '';
+      } else {
+        const socialLinks = [];
+        for (let i = 0; i < restaurantList[index].facebook.length; i += 1) {
+          socialLinks.push(
+            `<a href="${restaurantList[index].facebook[i]}" target="_blank">F${i}</a>`
+          );
+        }
+        restaurantList[index].facebook = socialLinks.join(', ');
+      }
+      if (restaurantList[index].instagram === undefined) {
+        restaurantList[index].instagram = '';
+      } else {
+        const socialLinks = [];
+        for (let i = 0; i < restaurantList[index].instagram.length; i += 1) {
+          socialLinks.push(
+            `<a href="${restaurantList[index].instagram[i]}" target="_blank">I${i}</a>`
+          );
+        }
+        restaurantList[index].instagram = socialLinks.join(', ');
+      }
+      if (restaurantList[index].twitter === undefined) {
+        restaurantList[index].twitter = '';
+      } else {
+        const socialLinks = [];
+        for (let i = 0; i < restaurantList[index].twitter.length; i += 1) {
+          socialLinks.push(
+            `<a href="${restaurantList[index].twitter[i]}" target="_blank">T${i}</a>`
+          );
+        }
+        restaurantList[index].twitter = socialLinks.join(', ');
+      }
+      if (restaurantList[index].youtube === undefined) {
+        restaurantList[index].youtube = '';
+      } else {
+        const socialLinks = [];
+        for (let i = 0; i < restaurantList[index].youtube.length; i += 1) {
+          socialLinks.push(
+            `<a href="${restaurantList[index].youtube[i]}" target="_blank">Y${i}</a>`
+          );
+        }
+        restaurantList[index].youtube = socialLinks.join(', ');
+      }
+
       if (
         restaurantList[index].location !== undefined &&
         restaurantList[index].location.latitude !== undefined
@@ -195,11 +247,11 @@ const get = async (req, res) => {
 
   if (req.query.exportExcel !== undefined) {
     const json2csvParser = new Json2csvParser({
-      csvHeaderFields
+      csvHeaderFields,
     });
     const csv = json2csvParser.parse(restaurantList);
     const path = `./logs/${Date.now()}.csv`;
-    fs.writeFile(path, csv, e => {
+    fs.writeFile(path, csv, (e) => {
       if (e) {
         throw e;
       } else {
@@ -213,7 +265,7 @@ const get = async (req, res) => {
       filtered,
       count,
       filters: count !== filtered,
-      fullRecordInfo: true
+      fullRecordInfo: true,
     });
   }
 };

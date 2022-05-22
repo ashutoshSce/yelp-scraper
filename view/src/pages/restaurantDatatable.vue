@@ -31,6 +31,15 @@
       <div class="column is-3-desktop is-8-tablet is-12-mobile">
         <vue-select-filter
           class="box"
+          title="Services"
+          multiple
+          :options="services"
+          v-model="filters.services"
+        />
+      </div>
+      <div class="column is-3-desktop is-8-tablet is-12-mobile">
+        <vue-select-filter
+          class="box"
           title="Neighborhoods"
           multiple
           :source="'api/v1/restaurant-filter/neighborhoods'"
@@ -95,8 +104,10 @@ export default {
     return {
       path: '/template.json',
       priceRangeList: [],
+      services: [],
       sponsoredList: [],
       filters: {
+        services: [],
         priceRange: [],
         categories: [],
         localities: [],
@@ -122,6 +133,11 @@ export default {
     this.sponsorshipList = [
       { name: 'Sponsored Results', id: 'true' },
       { name: 'Not Sponsored', id: 'false' },
+    ];
+    this.services = [
+      { name: 'Delivery', id: 'Delivery' },
+      { name: 'Takeout', id: 'Takeout' },
+      { name: 'Outdoor dining', id: 'Outdoor dining' },
     ];
   },
 };

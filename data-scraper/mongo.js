@@ -49,6 +49,15 @@ module.exports = class Mongo {
     });
   }
 
+  queryObjectOffsetWithCondition(collectionName, condition, skip, limit) {
+    return new Promise((resolve, reject) => {
+      this.db.collection(collectionName).find(condition).skip(skip).limit(limit).toArray(function (err, result) {
+        if (err) throw err;
+        resolve(result);
+      });
+    });
+  }
+
   writeObject(collectionName, obj) {
     obj['createdAt'] = new Date();
     return new Promise((resolve, reject) => {

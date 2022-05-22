@@ -10,10 +10,10 @@ const categories = async (req, res) => {
   let categoriesResponse = [];
   [err, categoriesList] = await to(restaurant.distinct('categories').lean());
   if (!err) {
-    categoriesList.forEach(value => {
+    categoriesList.forEach((value) => {
       categoriesResponse.push({
         id: value,
-        name: value
+        name: value,
       });
     });
     categoriesResponse = fp.sortBy('name')(categoriesResponse);
@@ -28,7 +28,7 @@ const neighborhoods = async (req, res) => {
   let neighborhoodsResponse = [];
   [err, neighborhoodsList] = await to(restaurant.distinct('neighborhoods').lean());
   if (!err) {
-    neighborhoodsList.forEach(value => {
+    neighborhoodsList.forEach((value) => {
       neighborhoodsResponse.push({
         id: value,
         name: value
@@ -46,10 +46,10 @@ const localities = async (req, res) => {
   let localitiesResponse = [];
   [err, localitiesList] = await to(restaurant.distinct('localities').lean());
   if (!err) {
-    localitiesList.forEach(value => {
+    localitiesList.forEach((value) => {
       localitiesResponse.push({
         id: value,
-        name: value
+        name: value,
       });
     });
     localitiesResponse = fp.sortBy('name')(localitiesResponse);

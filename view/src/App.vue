@@ -8,7 +8,7 @@
 </template>
 
 <script>
-import RestaurantDatatable from './pages/restaurantDatatable';
+import RestaurantDatatable from './pages/restaurantDatatable.vue';
 
 export default {
   name: 'App',

@@ -93,6 +93,30 @@
 				"escapable": true
 			}
 		}, {
+			"label": "Emails",
+			"name": "emails",
+			"data": "restaurant.emails",
+			"meta": {
+				"searchable": true,
+				"sortable": true,
+				"translatable": false,
+				"boolean": false,
+				"slot": false,
+				"rogue": false,
+				"total": false,
+				"date": false,
+				"array": true,
+				"icon": false,
+				"clickable": false,
+				"customTotal": false,
+				"notExportable": false,
+				"nullLast": false,
+				"visible": true,
+				"hidden": false,
+				"sort": null,
+				"escapable": true
+			}
+		}, {
 			"label": "Locations",
 			"name": "localities",
 			"data": "restaurant.localities",
@@ -144,6 +168,30 @@
 			"label": "Cuisines",
 			"name": "categories",
 			"data": "restaurant.categories",
+			"meta": {
+				"searchable": true,
+				"sortable": true,
+				"translatable": false,
+				"boolean": false,
+				"slot": false,
+				"rogue": false,
+				"total": false,
+				"date": false,
+				"array": true,
+				"icon": false,
+				"clickable": false,
+				"customTotal": false,
+				"notExportable": false,
+				"nullLast": false,
+				"visible": true,
+				"hidden": false,
+				"sort": null,
+				"escapable": true
+			}
+		}, {
+			"label": "Services",
+			"name": "services",
+			"data": "restaurant.services",
 			"meta": {
 				"searchable": true,
 				"sortable": true,
@@ -259,6 +307,78 @@
 				"hidden": false,
 				"sort": null,
 				"escapable": true
+			}
+		}, {
+			"label": "Yelp Ranking",
+			"name": "ranking",
+			"data": "restaurant.ranking",
+			"meta": {
+				"searchable": true,
+				"sortable": true,
+				"translatable": false,
+				"boolean": false,
+				"slot": false,
+				"rogue": false,
+				"total": false,
+				"date": false,
+				"array": true,
+				"icon": false,
+				"clickable": false,
+				"customTotal": false,
+				"notExportable": false,
+				"nullLast": false,
+				"visible": true,
+				"hidden": false,
+				"sort": null,
+				"escapable": true
+			}
+		}, {
+			"label": "Facebook",
+			"name": "facebook",
+			"data": "restaurant.facebook",
+			"meta": {
+				"searchable": true,
+				"sortable": true,
+				"translatable": false,
+				"boolean": false,
+				"slot": false,
+				"rogue": false,
+				"total": false,
+				"date": false,
+				"array": true,
+				"icon": false,
+				"clickable": false,
+				"customTotal": false,
+				"notExportable": false,
+				"nullLast": false,
+				"visible": true,
+				"hidden": false,
+				"sort": null,
+				"escapable": false
+			}
+		}, {
+			"label": "Instagram",
+			"name": "instagram",
+			"data": "restaurant.instagram",
+			"meta": {
+				"searchable": true,
+				"sortable": true,
+				"translatable": false,
+				"boolean": false,
+				"slot": false,
+				"rogue": false,
+				"total": false,
+				"date": false,
+				"array": true,
+				"icon": false,
+				"clickable": false,
+				"customTotal": false,
+				"notExportable": false,
+				"nullLast": false,
+				"visible": true,
+				"hidden": false,
+				"sort": null,
+				"escapable": false
 			}
 		}, {
 			"label": "Sponsored",

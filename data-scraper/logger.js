@@ -1,18 +1,10 @@
-const request = require('request');
+const axios = require('axios');
 
 module.exports = class Logger {
 
   sendMessageToSlack(message) {
-    return new Promise((resolve, reject) => {
-      request.post({
-        headers: {
-          'Content-type': 'application/json'
-        },
-        url: process.env.SLACK_HOOK,
-        body: '{"text":"' + process.env.APP_NAME + ' ' + process.env.APP_ENV + ' Message: ' + message + '"}'
-      }, function (error, response, body) {
-          resolve();
-      });
+    axios.post(process.env.SLACK_CHANNEL_WEBHOOK, {
+      text: process.env.APP_NAME + ' ' + process.env.APP_ENV + ' Message: ' + message
     });
   }
 

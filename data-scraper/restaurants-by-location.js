@@ -4,26 +4,19 @@ require('dotenv').config({
   path: __dirname + '/.env'
 });
 const puppeteer = require('puppeteer');
-const {
-  spawn
-} = require('child_process');
 
 const MongoModule = require('./mongo');
 const LoggerModule = require('./logger');
 const locations = {
-  "New%20York%2C%20NY": "New York",
-  "Bronx%2C%20NY": "Bronx",
-  "Brooklyn%2C%20NY": "Brooklyn",
-  "Queens%2C%20NY": "Queens",
-  "Manhattan%2C%20NY": "Manhattan",
-  "Staten%20Island%2C%20NY": "Staten Island",
-  "Nassau%20County%2C%20NY": "Nassau County",
-  "Suffolk%20County%2C%20NY": "Suffolk County",
-  "Rockland%20County%2C%20NY": "Rockland County",
-  "Rhinebeck%2C%20NY": "Rhinebeck",
-  "Woodstock%2C%20NY": "Woodstock",
-  "Tuxedo%2C%20NY": "Tuxedo",
-};
+  "New+York%2C+NY%2C+United+States": "New York",
+  "Nassau+County%2C+NY%2C+United+States": "Nassau County, NY",
+  "Nassau+County%2C+FL%2C+United+States": "Nassau County, FL",
+  "Suffolk+County%2C+NY%2C+United+States": "Suffolk County, NY",
+  "Suffolk+County%2C+MA%2C+United+States": "Suffolk County, MA",
+  "Westchester+County%2C+NY%2C+United+States": "Westchester County",
+  "Rockland+County%2C+NY%2C+United+States": "Rockland County",
+}
+
 let skipLocation = process.argv[2];
 let pageCount = parseInt(process.argv[3]) || 0;
 
@@ -35,12 +28,8 @@ function onlyUnique(value, index, self) {
   const logger = new LoggerModule();
 
   process.on('unhandledRejection', (err) => {
-    logger.sendMessageToSlack('Caught exceptionn: ' + err.toString()).then(() => {
-      // spawn(process.env.NODE_PATH, [__dirname + '/restaurants-by-location.js', skipLocation], {
-      //   detached: true
-      // });
-      process.exit();
-    });
+    logger.sendMessageToSlack('Caught exceptionn: ' + err.toString());
+    process.exit();
   });
 
   const mongo = new MongoModule();
@@ -51,46 +40,54 @@ function onlyUnique(value, index, self) {
     ignoreHTTPSErrors: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
+
   let start = 0;
+  let isBreak = false;
   for (const loc in locations) {
     start++;
     if(start <= skipLocation) {
       continue;
     }
+
+    skipLocation = 0;
     let locality =locations[loc];
     let count = 0;
     if(pageCount > 0) {
       count = pageCount;
       pageCount = 0;
     }
-    while (count < 961) {
-      logger.sendMessageToSlack('Scraping restaurants in '+locality+' '+ count);
-      const pageUrl = 'https://www.yelp.com/search/snippet?cflt=restaurants&find_loc='+loc+'&start='+count;
+    
+    logger.sendMessageToSlack('Scraping restaurants in '+locality+' '+ count);
+    while (count < 240) {
+      const pageUrl = 'https://www.yelp.com/search/snippet?find_desc=Restaurants&find_loc='+loc+'&start='+count;
+     
       const page = await browser.newPage();
       await page.goto(pageUrl);
+      
       restaurantDetails = await page.evaluate(() =>  {
-        return JSON.parse(document.querySelector("body").innerText); 
+        const textContent = document.querySelector("body").innerText;
+        return textContent.indexOf("You may need permission to access this page. Request permission") >= 0 ? "-" : JSON.parse(textContent);
       });
+      await page.close();
+
+      if(restaurantDetails === "-") {
+        logger.sendMessageToSlack('Permission Denied. Index: '+ (start - 1)+' '+ pageUrl);
+        isBreak = true;
+        break;
+      }
+      
       if(typeof restaurantDetails !== 'undefined' && 
-          typeof restaurantDetails.searchPageProps !== 'undefined' && 
-          typeof restaurantDetails.searchPageProps.searchResultsProps !== 'undefined' && 
-          restaurantDetails.searchPageProps.searchResultsProps !== null &&
-          typeof restaurantDetails.searchPageProps.searchResultsProps.searchResults !== 'undefined' &&
-          restaurantDetails.searchPageProps.searchResultsProps.searchResults !== null &&
-          Array.isArray(restaurantDetails.searchPageProps.searchResultsProps.searchResults) &&
-          restaurantDetails.searchPageProps.searchResultsProps.searchResults.length > 0) {
+          typeof restaurantDetails.searchPageProps !== 'undefined' &&
+          Array.isArray(restaurantDetails.searchPageProps.mainContentComponentsListProps) &&
+          restaurantDetails.searchPageProps.mainContentComponentsListProps.length > 0) {
         const businessAddressData = {};
         const businessMapData = {};
-        if(typeof restaurantDetails.searchPageProps.headerProps !== 'undefined' && 
-            typeof restaurantDetails.searchPageProps.headerProps.pagerData !== 'undefined' &&
-            typeof restaurantDetails.searchPageProps.headerProps.pagerData.end !== 'undefined'){
-              count = parseInt(restaurantDetails.searchPageProps.headerProps.pagerData.end) + 1;
-        }
 
-        if(typeof restaurantDetails.searchPageProps.searchMapProps !== 'undefined') {
+        if(typeof restaurantDetails.searchPageProps.rightRailProps !== 'undefined' &&
+          typeof restaurantDetails.searchPageProps.rightRailProps.searchMapProps !== 'undefined') {
           
-          if(typeof restaurantDetails.searchPageProps.searchMapProps.hovercardData !== 'undefined') {
-            const mapData = restaurantDetails.searchPageProps.searchMapProps.hovercardData;
+          if(typeof restaurantDetails.searchPageProps.rightRailProps.searchMapProps.hovercardData !== 'undefined') {
+            const mapData = restaurantDetails.searchPageProps.rightRailProps.searchMapProps.hovercardData;
             Object.keys(mapData).forEach(key => {
               businessAddressData[key] = {
                 address: mapData[key].addressLines,
@@ -99,11 +96,13 @@ function onlyUnique(value, index, self) {
             });
           }
 
-          if(typeof restaurantDetails.searchPageProps.searchMapProps.mapState !== 'undefined' &&
-            typeof restaurantDetails.searchPageProps.searchMapProps.mapState.markers !== 'undefined' && 
-            Array.isArray(restaurantDetails.searchPageProps.searchMapProps.mapState.markers) &&
-            restaurantDetails.searchPageProps.searchMapProps.mapState.markers.length > 0) {
-            restaurantDetails.searchPageProps.searchMapProps.mapState.markers.filter(item => typeof item.location !== 'undefined' && item.location !== null).forEach(item => {
+          if(typeof restaurantDetails.searchPageProps.rightRailProps.searchMapProps.mapState !== 'undefined' &&
+            typeof restaurantDetails.searchPageProps.rightRailProps.searchMapProps.mapState.markers !== 'undefined' && 
+            Array.isArray(restaurantDetails.searchPageProps.rightRailProps.searchMapProps.mapState.markers) &&
+            restaurantDetails.searchPageProps.rightRailProps.searchMapProps.mapState.markers.length > 0) {
+            restaurantDetails.searchPageProps.rightRailProps.searchMapProps.mapState.markers
+            .filter(item => typeof item.location !== 'undefined' && item.location !== null)
+            .forEach(item => {
               const id = item.hovercardId;
               if(typeof businessAddressData[id] !== 'undefined') {
                 businessMapData[businessAddressData[id].businessUrl] = {
@@ -115,7 +114,7 @@ function onlyUnique(value, index, self) {
           }
         }
 
-        const businesses = restaurantDetails.searchPageProps.searchResultsProps.searchResults.filter(item => typeof item.searchResultBusiness !== 'undefined').map(item => {
+        const businesses = restaurantDetails.searchPageProps.mainContentComponentsListProps.filter(item => typeof item.searchResultBusiness !== 'undefined').map(item => {
           const vendor = item.searchResultBusiness;
           let categories = [];
           if(typeof vendor.categories !== 'undefined') {
@@ -141,8 +140,26 @@ function onlyUnique(value, index, self) {
             }
           }
 
+          // Remove non utf characters from name
+          let output = "";
+          if(vendor.name) {
+            for (let i=0; i<vendor.name.length; i++) {
+                if (vendor.name.charCodeAt(i) <= 127) {
+                    output += vendor.name.charAt(i);
+                }
+            }
+          }
+
+          let services = [];
+          if(item.serviceOfferings &&
+             Array.isArray(item.serviceOfferings) &&
+             item.serviceOfferings.length > 0) {
+            services = item.serviceOfferings.filter(item => item?.icon?.name === "18x18_checkmark").map(item => item.label.text);
+          }
+
           return {
-            name: vendor.name,
+            name: output,
+            ranking: vendor.ranking,
             reviewCount: vendor.reviewCount,
             rating: vendor.rating,
             businessUrl: vendor.businessUrl,
@@ -153,13 +170,18 @@ function onlyUnique(value, index, self) {
             categories: categories,
             location: location,
             isAd: vendor.isAd,
-            localities:[locality]
+            localities:[locality],
+            services: services,
           }
         });
 
-        const businessesLength =businesses.length;
+        const businessesLength = businesses.length;
         for(let index=0; index < businessesLength; index++) {
           const item = businesses[index];
+          if(item.services.length === 0) {
+            delete(item.services);
+          }
+
           const queryObj = {
             businessUrl: item.businessUrl
           };
@@ -179,16 +201,22 @@ function onlyUnique(value, index, self) {
           }
         }
       } else {
-        logger.sendMessageToSlack('Scraping restaurants Error. '+skipLocation+' '+ pageUrl);
-        await page.close();
+        logger.sendMessageToSlack('Scraping restaurants Error. '+(start - 1)+' '+ pageUrl);
+        isBreak = true;
         break;
       }
-      await page.close();
+      count += 10;
     }
-    skipLocation++;
+
+    if(isBreak) {
+      break;
+    }
   }
 
   await browser.close();
   await mongo.disconnectToDb();
-  logger.sendMessageToSlack('Finished Scraping All Locations.');
+
+  if(!isBreak) {
+    logger.sendMessageToSlack('Finished Scraping All Locations.');
+  }
 })();

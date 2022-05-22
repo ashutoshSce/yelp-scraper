@@ -1,29 +1,20 @@
-/* Command: node restaurants-detail.js 6629 1000 */
+/* Command: node restaurants-detail.js 0 500 */
 require('dotenv').config({
   path: __dirname + '/.env'
 });
 const puppeteer = require('puppeteer');
-const {
-  spawn
-} = require('child_process');
 
 const MongoModule = require('./mongo');
 const LoggerModule = require('./logger');
 let skip = parseInt(process.argv[2]);
-let limit = parseInt(process.argv[3]) || 900;
-let failCount = 0;
+let limit = parseInt(process.argv[3]) || 1000;
 
 (async () => {
   const logger = new LoggerModule();
 
   process.on('unhandledRejection', (err) => {
-    console.log(require('util').format(err));
-    logger.sendMessageToSlack(skip+', '+limit+' Caught exceptionn: ' + err.toString()).then(() => {
-      // spawn(process.env.NODE_PATH, [__dirname + '/restaurants-detail.js', skip, limit], {
-      //   detached: true
-      // });
-      process.exit();
-    });
+   logger.sendMessageToSlack('Caught exceptionn: ' + err.toString());
+    process.exit();
   });
 
   const mongo = new MongoModule();
@@ -37,45 +28,52 @@ let failCount = 0;
   });
 
   for(let websiteIndex=0; websiteIndex<restaurantsLength; websiteIndex++) {
+    console.log(skip + websiteIndex);
     const websiteUrl = restaurants[websiteIndex].businessUrl;
     logger.sendMessageToSlack('Scraping Yelp Website Detail.' + websiteUrl);
     const page = await browser.newPage();
+    await page.setRequestInterception(true);
+    page.on('request', (request) => {
+        if (['image', 'stylesheet', 'font', 'script'].indexOf(request.resourceType()) !== -1) {
+            request.abort();
+        } else {
+            request.continue();
+        }
+    });
+
     const pageUrl = 'https://www.yelp.com'+websiteUrl;
     await page.goto(pageUrl);
 
-    restaurantDetails = await page.evaluate(() =>  {
-      return document.querySelector("body").outerHTML; 
+    const website = await page.evaluate(() => {
+      const link = document.querySelector('aside > section p > a[rel=noopener]');
+      if(link) {
+        const current_url = new URL(link.href);
+        const search_params = current_url.searchParams;
+        const url = search_params.get('url');
+        return {link: url, linkText: link.textContent } 
+      }
+
+      if (document.querySelector('p')?.textContent === "You may need permission to access this page. Request permission") {
+        return "-";
+      }
+      
+      return null;
     });
-    if(restaurantDetails.indexOf('Sorry, you’re not allowed to access this page.') >= 0) {
-      logger.sendMessageToSlack(pageUrl + ' BLOCKED -- Blocked ' + skip +' '+ limit);
-      failCount++;
-      await page.close();
-      break;
-    } else {
-      const reference = restaurantDetails.split("Business website</p>");
-      let tmp1 = [];
-      if(reference.length > 1) {
-        tmp1 = reference[1].split('</a></div>');
-        const linkText = tmp1[0]+'</a>';
-        const text = linkText.match(/<a [^>]+>([^<]+)<\/a>/)[1];
-        const link = linkText.match(/<a [^>]* href="([^"]*)"/)[1];
-        const url = link.match(/url=(.*)&amp;web/)[1];
-        const item = restaurants[websiteIndex];
-        item.link = decodeURIComponent(url);
-        item.linkText = text;
-        await mongo.updateObject('restaurant', item, { businessUrl: websiteUrl });
-        failCount = 0;
+
+    await page.close();
+    if(website) {
+      if(website === "-") {
+        logger.sendMessageToSlack('Permission Denied. Skip: '+ (skip + websiteIndex)+' '+ websiteUrl);
+        break;
       } else {
-        logger.sendMessageToSlack(pageUrl + ' Error in Scraping Yelp Website Detail. ' + skip +' '+ limit);
-        failCount++;
+        const item = restaurants[websiteIndex];
+        item.link = website.link
+        item.linkText = website.linkText;
+        await mongo.updateObject('restaurant', item, { businessUrl: websiteUrl });
       }
     }
-    await page.close();
-    skip++;
   }
+
   await browser.close();
   await mongo.disconnectToDb();
-  if(failCount === 0) {
-    logger.sendMessageToSlack('Finished Scraping Yelp website detail.' + skip+' '+limit);
-  }
 })();

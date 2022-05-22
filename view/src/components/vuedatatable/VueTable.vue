@@ -398,7 +398,7 @@ export default {
             rogue: column.meta.rogue,
             notExportable: column.meta.notExportable,
             array: column.meta.array,
-            visible: column.meta.visible
+            visible: column.meta.visible,
           },
           enum: column.enum,
         });
@@ -432,11 +432,11 @@ export default {
         path,
         this.exportRequest(),
       ).then((data) => {
-         let params = data.data.split('exportExcel=1');
-         if(params[1] !== undefined){
-            window.open((path+params[1]).replace('exportExcel=1', 'exportExcel=2'));
-         }
-        }).catch((error) => {
+        const params = data.data.split('exportExcel=1');
+        if (params[1] !== undefined) {
+          window.open((path + params[1]).replace('exportExcel=1', 'exportExcel=2'));
+        }
+      }).catch((error) => {
         const { status, data } = error.response;
 
         if (status === 555) {

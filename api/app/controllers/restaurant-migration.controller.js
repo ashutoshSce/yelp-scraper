@@ -11,17 +11,13 @@ const exportData = async (req, res) => {
   const skip = parseInt(req.query.skip, 10) || 0;
   const limit = parseInt(req.query.limit, 10) || 5;
   const format = req.query.format || 'file';
-  [err, restaurantList] = await to(
-    restaurant
-      .find()
-      .skip(skip)
-      .limit(limit)
-  );
+  [err, restaurantList] = await to(restaurant.find().skip(skip).limit(limit));
   if (!err) {
-    restaurantList.forEach(vendor => {
+    restaurantList.forEach((vendor) => {
       const item = {
         name: vendor.name,
         reviewCount: vendor.reviewCount,
+        ranking: vendor.ranking,
         rating: vendor.rating,
         businessUrl: vendor.businessUrl,
         phone: vendor.phone,
@@ -29,9 +25,15 @@ const exportData = async (req, res) => {
         address: vendor.address,
         neighborhoods: vendor.neighborhoods,
         categories: vendor.categories,
+        services: vendor.services,
+        facebook: vendor.facebook,
+        instagram: vendor.instagram,
+        youtube: vendor.youtube,
+        twitter: vendor.twitter,
+        emails: vendor.emails,
         location: vendor.location,
         isAd: vendor.isAd,
-        localities: vendor.localities
+        localities: vendor.localities,
       };
       if (vendor.link !== undefined) {
         item.link = vendor.link;
@@ -54,7 +56,7 @@ const exportData = async (req, res) => {
     res.status(200).json({
       count: restaurants.length,
       first: restaurants[0],
-      last: restaurants[restaurants.length - 1]
+      last: restaurants[restaurants.length - 1],
     });
   } else if (format === 'json') {
     res.status(200).json(restaurants);
@@ -73,7 +75,7 @@ const importData = async (req, res) => {
   res.status(200).json({
     count: restaurantList.length,
     first: restaurantList[0],
-    last: restaurantList[restaurantList.length - 1]
+    last: restaurantList[restaurantList.length - 1],
   });
 };
 
